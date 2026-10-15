@@ -1,0 +1,1320 @@
+
+<!DOCTYPE html>
+<html lang="vi">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>LAST EDEN 2099 | Survival</title>
+
+<style>
+@import url('https://fonts.googleapis.com/css2?family=Orbitron:wght@400;600;800&family=Rajdhani:wght@500;700&display=swap');
+
+:root {
+  --cyan: #00f5ff;
+  --pink: #ff286f;
+  --green: #b7ff52;
+}
+
+* { box-sizing: border-box; }
+
+body {
+  margin: 0;
+  overflow: hidden;
+  background: #02050d;
+  color: white;
+  font-family: 'Rajdhani', sans-serif;
+}
+
+canvas { display: block; }
+
+#hud {
+  position: fixed;
+  inset: 0;
+  pointer-events: none;
+  z-index: 3;
+}
+
+.top {
+  display: flex;
+  justify-content: space-between;
+  align-items: flex-start;
+  padding: 22px 28px;
+  background: linear-gradient(#02050dd9, transparent);
+}
+
+.logo {
+  font-family: Orbitron, sans-serif;
+  font-weight: 800;
+  font-size: clamp(15px, 2.5vw, 26px);
+  color: var(--cyan);
+  text-shadow: 0 0 18px #00f5ff80;
+  letter-spacing: 2px;
+}
+
+.logo small {
+  display: block;
+  margin-top: 5px;
+  font: 11px Orbitron, sans-serif;
+  color: #9aaec8;
+  letter-spacing: 3px;
+}
+
+.stats {
+  display: flex;
+  gap: 10px;
+  flex-wrap: wrap;
+  justify-content: flex-end;
+}
+
+.stat {
+  background: #06101dcc;
+  border: 1px solid #00f5ff55;
+  padding: 9px 13px;
+  min-width: 105px;
+  backdrop-filter: blur(8px);
+}
+
+.stat label {
+  display: block;
+  font-size: 11px;
+  letter-spacing: 2px;
+  color: #91a8c9;
+}
+
+.stat strong {
+  font: 600 17px Orbitron, sans-serif;
+}
+
+.bar {
+  height: 4px;
+  background: #243046;
+  margin-top: 7px;
+}
+
+.bar div {
+  height: 100%;
+  width: 100%;
+  background: var(--green);
+  transition: width .2s;
+}
+
+#bottom {
+  position: absolute;
+  bottom: 0;
+  left: 0;
+  right: 0;
+  padding: 18px 28px 22px;
+  display: flex;
+  align-items: end;
+  justify-content: space-between;
+  background: linear-gradient(transparent, #02050df0);
+}
+
+#objective {
+  max-width: 430px;
+  border-left: 3px solid var(--cyan);
+  padding-left: 14px;
+}
+
+#objective h3 {
+  margin: 0 0 5px;
+  color: var(--cyan);
+  font: 600 13px Orbitron, sans-serif;
+}
+
+#objective p {
+  margin: 0;
+  color: #c2d0e6;
+  font-size: 17px;
+}
+
+#message {
+  position: absolute;
+  top: 24%;
+  width: 100%;
+  text-align: center;
+  color: var(--cyan);
+  font: 600 15px Orbitron, sans-serif;
+  text-shadow: 0 0 15px #00f5ff;
+}
+
+#crosshair {
+  position: absolute;
+  top: 50%;
+  left: 50%;
+  transform: translate(-50%, -50%);
+  width: 18px;
+  height: 18px;
+  border: 1px solid #00f5ff9c;
+  border-radius: 50%;
+}
+
+#crosshair:before, #crosshair:after {
+  content: '';
+  position: absolute;
+  background: var(--cyan);
+}
+
+#crosshair:before {
+  width: 28px; height: 1px;
+  left: -6px; top: 8px;
+}
+
+#crosshair:after {
+  width: 1px; height: 28px;
+  left: 8px; top: -6px;
+}
+
+#overlay {
+  position: fixed;
+  inset: 0;
+  z-index: 10;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  background:
+    radial-gradient(ellipse at center, #0b2037b8, #02050df5 75%);
+  padding: 20px;
+}
+
+.panel {
+  width: min(650px, 100%);
+  padding: clamp(22px, 5vw, 45px);
+  border: 1px solid #00f5ff66;
+  background: #06101dee;
+  box-shadow: 0 0 70px #00e5ff16;
+}
+
+.kicker {
+  color: var(--pink);
+  font: 12px Orbitron, sans-serif;
+  letter-spacing: 4px;
+}
+
+h1 {
+  font: 800 clamp(28px, 7vw, 58px) Orbitron, sans-serif;
+  line-height: 1.12;
+  color: var(--cyan);
+  text-shadow: 0 0 28px #00f5ff40;
+  margin: 15px 0;
+}
+
+.panel p {
+  color: #b7c9df;
+  font-size: 18px;
+  line-height: 1.55;
+}
+
+.features {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 10px;
+  margin: 22px 0;
+}
+
+.feature {
+  border: 1px solid #273b52;
+  padding: 12px;
+  color: #c9d9ec;
+  font-size: 15px;
+}
+
+button {
+  font-family: Orbitron, sans-serif;
+  font-weight: 600;
+  cursor: pointer;
+  border: 0;
+}
+
+#start {
+  width: 100%;
+  padding: 17px;
+  background: var(--cyan);
+  color: #03101a;
+  font-size: 15px;
+  transition: .2s;
+}
+
+#start:hover {
+  background: white;
+  box-shadow: 0 0 28px #00f5ff66;
+}
+
+.note {
+  font-size: 12px !important;
+  color: #8297b2 !important;
+}
+
+#toast {
+  position: fixed;
+  z-index: 5;
+  left: 50%;
+  top: 35%;
+  transform: translate(-50%, -50%);
+  color: var(--green);
+  font: 600 16px Orbitron, sans-serif;
+  text-align: center;
+  pointer-events: none;
+  text-shadow: 0 0 15px #b7ff52;
+}
+
+@media(max-width: 600px) {
+  .top { padding: 12px; }
+  .stats { gap: 4px; }
+  .stat { min-width: 76px; padding: 6px; }
+  .stat strong { font-size: 12px; }
+  .stat label { font-size: 9px; }
+  #bottom { padding: 12px; }
+  #objective p { font-size: 14px; }
+}
+</style>
+</head>
+
+<body>
+
+<div id="hud">
+  <div class="top">
+    <div class="logo">
+      LAST EDEN
+      <small>PROTOCOL 2099 // SURVIVAL</small>
+    </div>
+
+    <div class="stats">
+      <div class="stat">
+        <label>VITALITY</label>
+        <strong id="hpText">100%</strong>
+        <div class="bar"><div id="hpBar"></div></div>
+      </div>
+      <div class="stat">
+        <label>ENERGY</label>
+        <strong id="energyText">100%</strong>
+        <div class="bar"><div id="energyBar"></div></div>
+      </div>
+      <div class="stat">
+        <label>FOOD</label>
+        <strong id="foodText">100%</strong>
+        <div class="bar"><div id="foodBar"></div></div>
+      </div>
+      <div class="stat">
+        <label>DATA CORES</label>
+        <strong id="coresText">0 / 8</strong>
+      </div>
+    </div>
+  </div>
+
+  <div id="crosshair"></div>
+  <div id="message"></div>
+  <div id="toast"></div>
+
+  <div id="bottom">
+    <div id="objective">
+      <h3>MISSION // LAST EDEN</h3>
+      <p id="objectiveText">
+        Thu thập 8 lõi dữ liệu để kích hoạt cổng thoát hiểm.
+      </p>
+    </div>
+    <div style="text-align:right;color:#8ca3bf;font-size:14px">
+      SECTOR 07<br>
+      <span id="clock" style="color:#00f5ff">00:00</span>
+    </div>
+  </div>
+</div>
+
+<div id="overlay">
+  <div class="panel">
+    <div class="kicker">YEAR 2099 // EARTH COLLAPSE</div>
+    <h1 id="title">LAST EDEN<br>2099</h1>
+    <p id="description">
+      Nền văn minh đã sụp đổ. Những cỗ máy từng bảo vệ nhân loại
+      giờ lang thang giữa thành phố hoang tàn. Bạn là người sống sót
+      cuối cùng của Sector 07.
+    </p>
+
+    <div class="features">
+      <div class="feature">◈ THẾ GIỚI 3D</div>
+      <div class="feature">◈ ROBOT SĂN ĐUỔI</div>
+      <div class="feature">◈ SINH TỒN & TÀI NGUYÊN</div>
+      <div class="feature">◈ NHIỆM VỤ THOÁT HIỂM</div>
+    </div>
+
+    <p style="font-size:15px">
+      <b style="color:#00f5ff">W A S D</b> Di chuyển<br>
+      <b style="color:#00f5ff">SHIFT</b> Chạy nhanh &nbsp;|&nbsp;
+      <b style="color:#00f5ff">E</b> Thu thập<br>
+      <b style="color:#00f5ff">F</b> Xung điện EMP &nbsp;|&nbsp;
+      <b style="color:#00f5ff">ESC</b> Tạm dừng
+    </p>
+
+    <button id="start">▶ KHỞI ĐỘNG NHIỆM VỤ</button>
+    <p class="note">
+      Dùng chuột để nhìn xung quanh. Khuyến nghị chơi trên máy tính.
+      Cần Internet để tải thư viện đồ họa 3D.
+    </p>
+  </div>
+</div>
+
+<script type="importmap">
+{
+  "imports": {
+    "three": "https://cdn.jsdelivr.net/npm/three@0.160.0/build/three.module.js"
+  }
+}
+</script>
+
+<script type="module">
+import * as THREE from 'three';
+
+// ======================================
+// LAST EDEN 2099 - GAME ENGINE
+// ======================================
+
+const $ = id => document.getElementById(id);
+
+let scene, camera, renderer, clock;
+let running = false;
+let ended = false;
+let gameTime = 0;
+
+let hp = 100;
+let energy = 100;
+let food = 100;
+let cores = 0;
+
+let yaw = 0;
+let pitch = 0;
+let verticalVelocity = 0;
+let grounded = true;
+let bobTime = 0;
+let empCooldown = 0;
+let damageFlash = 0;
+
+const keys = {};
+const buildings = [];
+const enemies = [];
+const pickups = [];
+const particles = [];
+const obstacles = [];
+
+const exitPosition = new THREE.Vector3(0, 0, -100);
+const playerPosition = new THREE.Vector3(0, 1.7, 12);
+
+const WORLD = 260;
+const UP = new THREE.Vector3(0, 1, 0);
+const forward = new THREE.Vector3();
+const right = new THREE.Vector3();
+const moveVector = new THREE.Vector3();
+
+let exitObject;
+let exitLight;
+let toastTimer = 0;
+
+const mat = (color, emissive = 0x000000, intensity = 0) =>
+  new THREE.MeshStandardMaterial({
+    color,
+    emissive,
+    emissiveIntensity: intensity,
+    roughness: 0.7,
+    metalness: 0.35
+  });
+
+const materials = {
+  ground: mat(0x101a28),
+  concrete: mat(0x263345),
+  dark: mat(0x080e19),
+  glass: mat(0x122d43, 0x003d60, 0.6),
+  cyan: mat(0x00dfff, 0x00cfff, 3),
+  pink: mat(0xff286f, 0xff0755, 2.5),
+  green: mat(0x8dff57, 0x60ff20, 2.5),
+  gold: mat(0xffd166, 0xff9c00, 2),
+  robot: mat(0x53667d, 0x172b40, 0.4),
+  white: mat(0xddeeff, 0x6eafff, 0.6)
+};
+
+function box(w, h, d, material, x, y, z, parent = scene) {
+  const mesh = new THREE.Mesh(
+    new THREE.BoxGeometry(w, h, d), material
+  );
+  mesh.position.set(x, y, z);
+  mesh.castShadow = false;
+  mesh.receiveShadow = true;
+  parent.add(mesh);
+  return mesh;
+}
+
+function random(min, max) {
+  return min + Math.random() * (max - min);
+}
+
+function init() {
+  scene = new THREE.Scene();
+  scene.background = new THREE.Color(0x050916);
+  scene.fog = new THREE.FogExp2(0x08111f, 0.012);
+
+  camera = new THREE.PerspectiveCamera(
+    75, innerWidth / innerHeight, 0.1, 500
+  );
+
+  camera.position.copy(playerPosition);
+  scene.add(camera);
+
+  renderer = new THREE.WebGLRenderer({
+    antialias: true,
+    powerPreference: "high-performance"
+  });
+
+  renderer.setPixelRatio(Math.min(devicePixelRatio, 1.7));
+  renderer.setSize(innerWidth, innerHeight);
+  renderer.outputColorSpace = THREE.SRGBColorSpace;
+  renderer.toneMapping = THREE.ACESFilmicToneMapping;
+  renderer.toneMappingExposure = 1.2;
+
+  document.body.appendChild(renderer.domElement);
+
+  clock = new THREE.Clock();
+
+  scene.add(new THREE.HemisphereLight(0x819bc9, 0x121622, 2.0));
+
+  const moon = new THREE.DirectionalLight(0x8bb8ff, 2);
+  moon.position.set(-30, 60, 20);
+  scene.add(moon);
+
+  // Ánh sáng gắn với nhân vật
+  const flashlight = new THREE.PointLight(0x55ccff, 18, 24, 2);
+  flashlight.position.set(0, 0, 0);
+  camera.add(flashlight);
+
+  createWorld();
+  createBuildings();
+  createStreetDetails();
+  createPickups();
+  createEnemies();
+  createExit();
+
+  window.addEventListener("resize", onResize);
+  document.addEventListener("keydown", onKeyDown);
+  document.addEventListener("keyup", e => keys[e.code] = false);
+
+  document.addEventListener("mousemove", onMouseMove);
+  document.addEventListener("pointerlockchange", onLockChange);
+
+  renderer.domElement.addEventListener("click", () => {
+    if (running && !ended &&
+        document.pointerLockElement !== renderer.domElement) {
+      renderer.domElement.requestPointerLock();
+    }
+  });
+
+  $("start").addEventListener("click", startGame);
+
+  animate();
+}
+
+function createWorld() {
+  const ground = new THREE.Mesh(
+    new THREE.PlaneGeometry(WORLD, WORLD),
+    materials.ground
+  );
+
+  ground.rotation.x = -Math.PI / 2;
+  ground.position.y = -0.08;
+  scene.add(ground);
+
+  // Đường phố chính
+  box(15, 0.04, WORLD, materials.dark, 0, 0, 0);
+  box(0.15, 0.045, WORLD, materials.gold, -7.3, 0.01, 0);
+  box(0.15, 0.045, WORLD, materials.gold, 7.3, 0.01, 0);
+
+  // Các vạch đường
+  for (let z = -WORLD / 2; z < WORLD / 2; z += 12) {
+    box(0.22, 0.05, 4, materials.white, 0, 0.03, z);
+  }
+
+  // Lưới kỹ thuật trên mặt đất
+  const grid = new THREE.GridHelper(
+    WORLD, 65, 0x17475d, 0x17253a
+  );
+  grid.position.y = 0.015;
+  scene.add(grid);
+
+  // Bầu trời với các ngôi sao
+  const positions = [];
+
+  for (let i = 0; i < 1300; i++) {
+    positions.push(
+      random(-WORLD, WORLD),
+      random(12, 100),
+      random(-WORLD, WORLD)
+    );
+  }
+
+  const geometry = new THREE.BufferGeometry();
+  geometry.setAttribute(
+    "position",
+    new THREE.Float32BufferAttribute(positions, 3)
+  );
+
+  const stars = new THREE.Points(
+    geometry,
+    new THREE.PointsMaterial({
+      color: 0x9acfff,
+      size: 0.3,
+      transparent: true,
+      opacity: 0.75
+    })
+  );
+
+  scene.add(stars);
+}
+
+function createBuildings() {
+  for (let side of [-1, 1]) {
+    for (let z = -WORLD / 2; z < WORLD / 2; z += 15) {
+      const x = side * random(14, 32);
+      const depth = random(9, 15);
+      const width = random(8, 15);
+      const height = random(12, 45);
+
+      const building = new THREE.Group();
+      building.position.set(x, 0, z + random(-4, 4));
+
+      const body = box(
+        width, height, depth,
+        Math.random() > 0.45 ? materials.concrete : materials.dark,
+        0, height / 2, 0, building
+      );
+
+      // Mái nhà công nghiệp
+      box(
+        width * 0.6, 1.5, depth * 0.6,
+        materials.dark, 0, height + 0.7, 0, building
+      );
+
+      // Cửa sổ neon
+      const rows = Math.min(10, Math.floor(height / 3));
+
+      for (let row = 0; row < rows; row++) {
+        for (let col = 0; col < 3; col++) {
+          const wx = (col - 1) * width * 0.27;
+          const wy = 2 + row * 2.8;
+
+          box(
+            width * 0.12, 1.1, 0.08,
+            Math.random() > 0.75 ? materials.pink : materials.glass,
+            wx, wy, depth / 2 + 0.05, building
+          );
+        }
+      }
+
+      // Cột anten trên mái
+      if (Math.random() > 0.4) {
+        box(
+          0.18, random(3, 8), 0.18,
+          materials.dark, 0, height + 4, 0, building
+        );
+
+        box(
+          0.6, 0.4, 0.6,
+          materials.cyan, 0, height + 7, 0, building
+        );
+      }
+
+      scene.add(building);
+      buildings.push({
+        x, z: building.position.z,
+        w: width, d: depth, h: height
+      });
+
+      // Đống đổ nát bên ngoài lòng đường
+      for (let j = 0; j < 3; j++) {
+        const debris = box(
+          random(1, 3), random(0.5, 2), random(1, 3),
+          materials.dark,
+          x + random(-9, 9), 0.5, z + random(-6, 6)
+        );
+
+        debris.rotation.y = random(0, Math.PI);
+        debris.rotation.z = random(-0.2, 0.2);
+
+        obstacles.push({
+          x: debris.position.x,
+          z: debris.position.z,
+          r: 1.4
+        });
+      }
+    }
+  }
+}
+
+function createStreetDetails() {
+  // Đèn đường tương lai
+  for (let z = -115; z < 120; z += 25) {
+    for (let side of [-1, 1]) {
+      const x = side * 9.5;
+
+      box(0.3, 6, 0.3, materials.dark, x, 3, z);
+      box(1.4, 0.18, 0.5, materials.cyan, x, 6, z);
+
+      const light = new THREE.PointLight(0x00bfff, 5, 12);
+      light.position.set(x, 5.5, z);
+      scene.add(light);
+    }
+  }
+
+  // Những cột điện hư hỏng
+  for (let i = 0; i < 22; i++) {
+    const x = random(-8, 8);
+    const z = random(-120, 120);
+
+    if (Math.abs(x) < 1.5) continue;
+
+    const h = random(0.4, 1.6);
+
+    const debris = box(
+      random(0.3, 1.5), h, random(0.3, 1.2),
+      materials.concrete, x, h / 2, z
+    );
+
+    debris.rotation.y = random(0, Math.PI);
+  }
+}
+
+function createPickups() {
+  const positions = [];
+
+  // Vật phẩm phân bố dọc đường
+  for (let i = 0; i < 8; i++) {
+    positions.push([
+      random(-5.5, 5.5),
+      0.9,
+      -12 - i * 20
+    ]);
+  }
+
+  positions.forEach((p, i) => {
+    const group = new THREE.Group();
+
+    group.position.set(p[0], p[1], p[2]);
+
+    const crystal = new THREE.Mesh(
+      new THREE.OctahedronGeometry(0.65, 0),
+      materials.gold
+    );
+
+    group.add(crystal);
+
+    const ring = new THREE.Mesh(
+      new THREE.TorusGeometry(0.9, 0.035, 8, 24),
+      materials.cyan
+    );
+
+    ring.rotation.x = Math.PI / 2;
+    group.add(ring);
+
+    const light = new THREE.PointLight(0xffb52e, 3, 6);
+    group.add(light);
+
+    scene.add(group);
+
+    pickups.push({
+      group,
+      type: "core",
+      collected: false,
+      baseY: p[1],
+      phase: i
+    });
+  });
+
+  // Pin hồi năng lượng
+  for (let i = 0; i < 5; i++) {
+    const group = new THREE.Group();
+
+    group.position.set(
+      random(-5, 5), 0.8, -8 - i * 43
+    );
+
+    const cube = new THREE.Mesh(
+      new THREE.BoxGeometry(0.7, 1, 0.7),
+      materials.green
+    );
+
+    group.add(cube);
+
+    const ring = new THREE.Mesh(
+      new THREE.TorusGeometry(0.7, 0.04, 8, 20),
+      materials.green
+    );
+
+    ring.rotation.x = Math.PI / 2;
+    group.add(ring);
+
+    scene.add(group);
+
+    pickups.push({
+      group,
+      type: "battery",
+      collected: false,
+      baseY: 0.8,
+      phase: i + 12
+    });
+  }
+
+  // Thực phẩm sinh tồn
+  for (let i = 0; i < 4; i++) {
+    const group = new THREE.Group();
+
+    group.position.set(
+      random(-5, 5), 0.8, -24 - i * 48
+    );
+
+    const cube = new THREE.Mesh(
+      new THREE.BoxGeometry(0.9, 0.8, 0.9),
+      materials.pink
+    );
+
+    group.add(cube);
+    scene.add(group);
+
+    pickups.push({
+      group,
+      type: "food",
+      collected: false,
+      baseY: 0.8,
+      phase: i + 20
+    });
+  }
+}
+
+function createEnemies() {
+  for (let i = 0; i < 7; i++) {
+    const group = new THREE.Group();
+
+    const body = new THREE.Mesh(
+      new THREE.BoxGeometry(1.1, 1.4, 0.8),
+      materials.robot
+    );
+
+    body.position.y = 1.5;
+    group.add(body);
+
+    const head = new THREE.Mesh(
+      new THREE.BoxGeometry(0.8, 0.65, 0.7),
+      materials.dark
+    );
+
+    head.position.y = 2.5;
+    group.add(head);
+
+    const eye = new THREE.Mesh(
+      new THREE.BoxGeometry(0.6, 0.12, 0.08),
+      materials.pink
+    );
+
+    eye.position.set(0, 2.5, -0.38);
+    group.add(eye);
+
+    // Hai chân robot
+    for (let side of [-1, 1]) {
+      const leg = new THREE.Mesh(
+        new THREE.BoxGeometry(0.22, 0.8, 0.25),
+        materials.robot
+      );
+
+      leg.position.set(side * 0.3, 0.5, 0);
+      group.add(leg);
+    }
+
+    const light = new THREE.PointLight(0xff164f, 2, 7);
+    light.position.y = 2.5;
+    group.add(light);
+
+    group.position.set(
+      random(-5, 5), 0, -25 - i * 24
+    );
+
+    scene.add(group);
+
+    enemies.push({
+      group,
+      hp: 3,
+      speed: random(1.1, 2),
+      stunned: 0,
+      alive: true,
+      attackCooldown: 0,
+      phase: Math.random() * 10
+    });
+  }
+}
+
+function createExit() {
+  exitObject = new THREE.Group();
+  exitObject.position.copy(exitPosition);
+
+  // Khung cổng
+  box(0.6, 8, 0.6, materials.dark, -3, 4, 0, exitObject);
+  box(0.6, 8, 0.6, materials.dark, 3, 4, 0, exitObject);
+  box(6.6, 0.6, 0.6, materials.cyan, 0, 8, 0, exitObject);
+
+  const ring = new THREE.Mesh(
+    new THREE.TorusGeometry(2.1, 0.12, 12, 48),
+    materials.cyan
+  );
+
+  ring.position.y = 3.8;
+  exitObject.add(ring);
+
+  const light = new THREE.PointLight(0x00eaff, 12, 25);
+  light.position.set(0, 4, 0);
+  exitObject.add(light);
+
+  exitLight = light;
+
+  scene.add(exitObject);
+}
+
+function startGame() {
+  if (!renderer) return;
+
+  if (ended) {
+    location.reload();
+    return;
+  }
+
+  running = true;
+  $("overlay").style.display = "none";
+  $("message").textContent = "MISSION ACTIVE // SECTOR 07";
+
+  renderer.domElement.requestPointerLock();
+  clock.getDelta();
+}
+
+function onLockChange() {
+  if (document.pointerLockElement !== renderer.domElement &&
+      running && !ended) {
+    running = false;
+    $("overlay").style.display = "flex";
+    $("title").innerHTML = "MISSION<br>PAUSED";
+    $("description").textContent =
+      "Nhiệm vụ đang tạm dừng. Nhấn nút bên dưới để tiếp tục.";
+    $("start").textContent = "▶ TIẾP TỤC";
+    $("message").textContent = "";
+  }
+}
+
+function onMouseMove(e) {
+  if (!running ||
+      document.pointerLockElement !== renderer.domElement) return;
+
+  yaw -= e.movementX * 0.002;
+  pitch -= e.movementY * 0.002;
+
+  pitch = THREE.MathUtils.clamp(
+    pitch, -Math.PI / 2.3, Math.PI / 2.3
+  );
+}
+
+function onKeyDown(e) {
+  keys[e.code] = true;
+
+  if ([
+    "KeyW", "KeyA", "KeyS", "KeyD",
+    "ShiftLeft", "Space"
+  ].includes(e.code)) {
+    e.preventDefault();
+  }
+
+  if (e.repeat) return;
+
+  if (e.code === "KeyE") collectNearby();
+  if (e.code === "KeyF") useEMP();
+
+  if (e.code === "Escape" && running) {
+    running = false;
+  }
+}
+
+function collectNearby() {
+  if (!running) return;
+
+  let nearest = null;
+  let distance = 3.2;
+
+  for (const item of pickups) {
+    if (item.collected) continue;
+
+    const d = Math.hypot(
+      camera.position.x - item.group.position.x,
+      camera.position.z - item.group.position.z
+    );
+
+    if (d < distance) {
+      distance = d;
+      nearest = item;
+    }
+  }
+
+  if (!nearest) {
+    showToast("KHÔNG CÓ VẬT PHẨM GẦN ĐÂY");
+    return;
+  }
+
+  nearest.collected = true;
+  scene.remove(nearest.group);
+
+  if (nearest.type === "core") {
+    cores++;
+    energy = Math.min(100, energy + 8);
+    showToast("◆ DATA CORE +" + cores + " / 8");
+  } else if (nearest.type === "battery") {
+    energy = Math.min(100, energy + 35);
+    showToast("⚡ NĂNG LƯỢNG +35%");
+  } else {
+    food = Math.min(100, food + 35);
+    showToast("✚ THỰC PHẨM +35%");
+  }
+
+  updateHUD();
+}
+
+function useEMP() {
+  if (!running || empCooldown > 0) return;
+
+  if (energy < 25) {
+    showToast("KHÔNG ĐỦ NĂNG LƯỢNG!");
+    return;
+  }
+
+  energy -= 25;
+  empCooldown = 5;
+
+  // Vòng sóng xung điện
+  const ring = new THREE.Mesh(
+    new THREE.TorusGeometry(1, 0.12, 8, 48),
+    materials.cyan
+  );
+
+  ring.position.copy(camera.position);
+  ring.position.y = 1;
+  ring.rotation.x = Math.PI / 2;
+  scene.add(ring);
+
+  const startTime = performance.now();
+
+  function pulse() {
+    if (!ring.parent) return;
+
+    const t = (performance.now() - startTime) / 450;
+
+    ring.scale.setScalar(1 + t * 12);
+    ring.material.opacity = Math.max(0, 1 - t);
+    ring.material.transparent = true;
+
+    if (t >= 1) {
+      scene.remove(ring);
+      ring.geometry.dispose();
+      ring.material.dispose();
+    } else {
+      requestAnimationFrame(pulse);
+    }
+  }
+
+  pulse();
+
+  for (const enemy of enemies) {
+    if (!enemy.alive) continue;
+
+    const d = enemy.group.position.distanceTo(camera.position);
+
+    if (d < 12) {
+      enemy.stunned = 4;
+      enemy.hp--;
+
+      if (enemy.hp <= 0) {
+        enemy.alive = false;
+        scene.remove(enemy.group);
+        showToast("ROBOT ĐÃ BỊ VÔ HIỆU HÓA");
+      }
+    }
+  }
+
+  showToast("EMP ACTIVATED // XUNG ĐIỆN");
+  updateHUD();
+}
+
+function showToast(text) {
+  $("toast").textContent = text;
+  toastTimer = 2.0;
+}
+
+function updateHUD() {
+  $("hpText").textContent = Math.ceil(hp) + "%";
+  $("energyText").textContent = Math.ceil(energy) + "%";
+  $("foodText").textContent = Math.ceil(food) + "%";
+  $("coresText").textContent = cores + " / 8";
+
+  $("hpBar").style.width = hp + "%";
+  $("energyBar").style.width = energy + "%";
+  $("foodBar").style.width = food + "%";
+
+  $("hpBar").style.background = hp < 30 ? "#ff286f" : "#b7ff52";
+  $("energyBar").style.background = "#00f5ff";
+  $("foodBar").style.background = food < 25 ? "#ff286f" : "#b7ff52";
+
+  if (cores >= 8) {
+    $("objectiveText").textContent =
+      "ĐÃ ĐỦ 8 LÕI! Hãy tiến đến cổng thoát hiểm màu xanh.";
+  }
+}
+
+function damage(amount) {
+  hp = Math.max(0, hp - amount);
+  damageFlash = 0.3;
+  updateHUD();
+
+  if (hp <= 0) {
+    finishGame(false);
+  }
+}
+
+function finishGame(won) {
+  running = false;
+  ended = true;
+  document.exitPointerLock();
+
+  $("overlay").style.display = "flex";
+
+  $("title").innerHTML = won
+    ? "EDEN<br>RESTORED"
+    : "SYSTEM<br>COLLAPSED";
+
+  $("description").textContent = won
+    ? "Bạn đã thoát khỏi Sector 07 và khôi phục tín hiệu cuối cùng của nhân loại."
+    : "Bạn đã không thể sống sót. Thành phố vẫn còn đó, chờ đợi một người khác.";
+
+  $("start").textContent = "↻ CHƠI LẠI";
+  $("message").textContent = won
+    ? "MISSION COMPLETE"
+    : "MISSION FAILED";
+}
+
+function updatePlayer(dt) {
+  camera.rotation.order = "YXZ";
+  camera.rotation.y = yaw;
+  camera.rotation.x = pitch;
+
+  forward.set(-Math.sin(yaw), 0, -Math.cos(yaw));
+  right.set(Math.cos(yaw), 0, -Math.sin(yaw));
+
+  moveVector.set(0, 0, 0);
+
+  if (keys.KeyW) moveVector.add(forward);
+  if (keys.KeyS) moveVector.sub(forward);
+  if (keys.KeyD) moveVector.add(right);
+  if (keys.KeyA) moveVector.sub(right);
+
+  const moving = moveVector.lengthSq() > 0;
+
+  if (moving) {
+    moveVector.normalize();
+
+    const sprint = keys.ShiftLeft || keys.ShiftRight;
+    const speed = sprint ? 9 : 5;
+
+    if (sprint && energy > 0) {
+      energy = Math.max(0, energy - 7 * dt);
+    }
+
+    const oldX = camera.position.x;
+    const oldZ = camera.position.z;
+
+    camera.position.x += moveVector.x * speed * dt;
+    camera.position.z += moveVector.z * speed * dt;
+
+    // Giữ nhân vật trong khu vực chơi
+    camera.position.x = THREE.MathUtils.clamp(
+      camera.position.x, -WORLD / 2 + 3, WORLD / 2 - 3
+    );
+
+    camera.position.z = THREE.MathUtils.clamp(
+      camera.position.z, -WORLD / 2 + 3, WORLD / 2 - 3
+    );
+
+    // Không đi xuyên qua các tòa nhà
+    for (const b of buildings) {
+      const insideX = Math.abs(camera.position.x - b.x) < b.w / 2 + 0.7;
+      const insideZ = Math.abs(camera.position.z - b.z) < b.d / 2 + 0.7;
+
+      if (insideX && insideZ) {
+        camera.position.x = oldX;
+        camera.position.z = oldZ;
+        break;
+      }
+    }
+
+    // Va chạm đống đổ nát
+    for (const o of obstacles) {
+      const dx = camera.position.x - o.x;
+      const dz = camera.position.z - o.z;
+
+      if (Math.hypot(dx, dz) < o.r + 0.5) {
+        camera.position.x = oldX;
+        camera.position.z = oldZ;
+        break;
+      }
+    }
+
+    bobTime += dt * (sprint ? 15 : 10);
+  }
+
+  // Nhảy
+  if (keys.Space && grounded) {
+    verticalVelocity = 6;
+    grounded = false;
+  }
+
+  if (!grounded) {
+    verticalVelocity -= 15 * dt;
+    camera.position.y += verticalVelocity * dt;
+
+    if (camera.position.y <= 1.7) {
+      camera.position.y = 1.7;
+      verticalVelocity = 0;
+      grounded = true;
+    }
+  } else {
+    camera.position.y = 1.7 + (moving ? Math.sin(bobTime) * 0.045 : 0);
+  }
+
+  // Sinh tồn theo thời gian
+  food = Math.max(0, food - 0.32 * dt);
+  energy = Math.max(0, energy - 0.12 * dt);
+
+  if (food <= 0) {
+    hp = Math.max(0, hp - 2 * dt);
+  }
+
+  empCooldown = Math.max(0, empCooldown - dt);
+
+  if (hp <= 0) finishGame(false);
+
+  updateHUD();
+}
+
+function updateWorld(dt) {
+  gameTime += dt;
+
+  $("clock").textContent = new Date(gameTime * 1000)
+    .toISOString().slice(14, 19);
+
+  // Vật phẩm lơ lửng
+  for (const item of pickups) {
+    if (item.collected) continue;
+
+    item.group.rotation.y += dt * 0.8;
+    item.group.position.y =
+      item.baseY + Math.sin(gameTime * 2 + item.phase) * 0.15;
+  }
+
+  // Robot tuần tra và truy đuổi
+  for (const enemy of enemies) {
+    if (!enemy.alive) continue;
+
+    enemy.phase += dt * 4;
+
+    if (enemy.stunned > 0) {
+      enemy.stunned -= dt;
+      enemy.group.rotation.z = Math.sin(gameTime * 25) * 0.2;
+      continue;
+    }
+
+    enemy.group.rotation.z = 0;
+
+    const pos = enemy.group.position;
+    const dx = camera.position.x - pos.x;
+    const dz = camera.position.z - pos.z;
+    const distance = Math.hypot(dx, dz);
+
+    if (distance < 24 && distance > 1.6) {
+      const speed = enemy.speed * (distance < 10 ? 1.3 : 1);
+
+      const nextX = pos.x + dx / distance * speed * dt;
+      const nextZ = pos.z + dz / distance * speed * dt;
+
+      // Không cho robot xuyên qua nhà
+      let blocked = false;
+
+      for (const b of buildings) {
+        if (Math.abs(nextX - b.x) < b.w / 2 + 0.6 &&
+            Math.abs(nextZ - b.z) < b.d / 2 + 0.6) {
+          blocked = true;
+          break;
+        }
+      }
+
+      if (!blocked) {
+        pos.x = nextX;
+        pos.z = nextZ;
+      }
+
+      enemy.group.rotation.y = Math.atan2(dx, dz);
+    }
+
+    enemy.group.position.y =
+      Math.sin(enemy.phase) * 0.06;
+
+    enemy.attackCooldown -= dt;
+
+    if (distance < 2.2 && enemy.attackCooldown <= 0) {
+      damage(8);
+      enemy.attackCooldown = 1.3;
+      showToast("CẢNH BÁO: ROBOT TẤN CÔNG!");
+    }
+  }
+
+  // Hiệu ứng cổng thoát
+  if (exitObject) {
+    exitObject.children[3].rotation.z = Math.sin(gameTime * 1.5) * 0.15;
+    exitLight.intensity = 9 + Math.sin(gameTime * 3) * 3;
+  }
+
+  if (toastTimer > 0) {
+    toastTimer -= dt;
+    if (toastTimer <= 0) $("toast").textContent = "";
+  }
+
+  if (damageFlash > 0) {
+    damageFlash -= dt;
+  }
+
+  // Kiểm tra nhiệm vụ
+  if (cores >= 8 &&
+      camera.position.distanceTo(exitPosition) < 6) {
+    finishGame(true);
+  }
+}
+
+function onResize() {
+  if (!camera || !renderer) return;
+
+  camera.aspect = innerWidth / innerHeight;
+  camera.updateProjectionMatrix();
+  renderer.setSize(innerWidth, innerHeight);
+  renderer.setPixelRatio(Math.min(devicePixelRatio, 1.7));
+}
+
+function animate() {
+  requestAnimationFrame(animate);
+
+  const dt = Math.min(clock.getDelta(), 0.05);
+
+  if (running && !ended) {
+    updatePlayer(dt);
+    updateWorld(dt);
+  }
+
+  renderer.render(scene, camera);
+}
+
+init();
+</script>
+</body>
+</html>
